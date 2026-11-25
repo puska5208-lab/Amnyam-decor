@@ -5,8 +5,10 @@
 using namespace geode::prelude;
 
 class $modify(AmnyamEditor, EditorUI) {
+
     bool init(LevelEditorLayer* editor) {
-        if (!EditorUI::init(editor)) return false;
+        if (!EditorUI::init(editor))
+            return false;
 
         auto btn = CCMenuItemSpriteExtra::create(
             ButtonSprite::create("DEC"),
@@ -21,38 +23,22 @@ class $modify(AmnyamEditor, EditorUI) {
         menu->setPosition({size.width - 35, 150});
 
         this->addChild(menu);
+
         return true;
     }
 
     void openDecor(CCObject*) {
-        createQuickPopup(
+        auto objects = this->getSelectedObjects();
+
+        int count = objects ? objects->count() : 0;
+
+        FLAlertLayer::create(
             "AMNYAM DECOR",
-            "Choose decoration color!",
-            "Green",
-            "More colors",
-            [this](auto, bool more) {
-                if (more) {
-                    createQuickPopup(
-                        "AMNYAM DECOR",
-                        "Choose another color!",
-                        "Blue",
-                        "Yellow",
-                        [](auto, bool yellow) {
-                            FLAlertLayer::create(
-                                "AMNYAM DECOR",
-                                yellow ? "Yellow selected!" : "Blue selected!",
-                                "OK"
-                            )->show();
-                        }
-                    );
-                } else {
-                    FLAlertLayer::create(
-                        "AMNYAM DECOR",
-                        "Green selected!",
-                        "OK"
-                    )->show();
-                }
-            }
-        );
+            fmt::format(
+                "Selected objects: {}",
+                count
+            ),
+            "OK"
+        )->show();
     }
 };
