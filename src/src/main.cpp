@@ -21,18 +21,18 @@ class $modify(AmnyamMenu, MenuLayer) {
     }
 
     void openDecor(CCObject*) {
-        FLAlertLayer::create(
+        createQuickPopup(
             "AMNYAM DECOR",
             "Choose your decoration style!",
             "Green",
             "Yellow",
-            [](FLAlertLayer*, bool yellow) {
+            [](auto, bool yellow) {
                 FLAlertLayer::create(
                     "AMNYAM DECOR",
                     yellow ? "Yellow Decor selected!" : "Green Decor selected!",
                     "OK"
                 )->show();
             }
-        )->show();
+        );
     }
 };
