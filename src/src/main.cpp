@@ -1,6 +1,6 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/EditorUI.hpp>
-#include <algorithm>
+#include <fmt/format.h>
 
 using namespace geode::prelude;
 
@@ -56,59 +56,53 @@ class $modify(AmnyamEditor, EditorUI) {
         if (!objects || objects->count() == 0) {
             FLAlertLayer::create(
                 "AMNYAM AI",
-                "Select a building first!",
+                "Select blocks first!",
                 "OK"
             )->show();
             return;
         }
 
-        float minX = 999999.f;
-        float minY = 999999.f;
-        float maxX = -999999.f;
-        float maxY = -999999.f;
+        int added = 0;
 
         for (int i = 0; i < objects->count(); i++) {
             auto obj = static_cast<GameObject*>(
                 objects->objectAtIndex(i)
             );
 
+            if (!obj)
+                continue;
+
             auto pos = obj->getPosition();
+            float scale = obj->getScale();
 
-            minX = std::min(minX, pos.x);
-            minY = std::min(minY, pos.y);
-            maxX = std::max(maxX, pos.x);
-            maxY = std::max(maxY, pos.y);
+            if (scale <= 0.f)
+                scale = 1.f;
+
+            float offset = 5.f * scale;
+            float decoScale = 0.18f * scale;
+
+            auto addInside = [&](float x, float y) {
+                auto data = fmt::format(
+                    "1,1,2,{:.2f},3,{:.2f},32,{:.3f}",
+                    x, y, decoScale
+                );
+
+                m_editorLayer->createObjectsFromString(
+                    data, false, false
+                );
+
+                added++;
+            };
+
+            addInside(pos.x - offset, pos.y);
+            addInside(pos.x + offset, pos.y);
+            addInside(pos.x, pos.y + offset);
+            addInside(pos.x, pos.y - offset);
         }
-
-        float centerX = (minX + maxX) / 2.f;
-        float centerY = (minY + maxY) / 2.f;
-        float offset = 25.f;
-
-        auto addDecor = [&](float x, float y) {
-            auto data = fmt::format(
-                "1,1,2,{:.2f},3,{:.2f},32,0.35",
-                x, y
-            );
-
-            m_editorLayer->createObjectsFromString(
-                data, false, false
-            );
-        };
-
-        addDecor(minX - offset, maxY + offset);
-        addDecor(centerX, maxY + offset);
-        addDecor(maxX + offset, maxY + offset);
-
-        addDecor(minX - offset, centerY);
-        addDecor(maxX + offset, centerY);
-
-        addDecor(minX - offset, minY - offset);
-        addDecor(centerX, minY - offset);
-        addDecor(maxX + offset, minY - offset);
 
         FLAlertLayer::create(
             "AMNYAM AI",
-            "Decor objects added!",
+            fmt::format("Added {} decor objects!", added),
             "OK"
         )->show();
     }
