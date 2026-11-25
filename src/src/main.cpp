@@ -9,34 +9,30 @@ class $modify(AmnyamMenu, MenuLayer) {
 
         auto menu = this->getChildByID("bottom-menu");
         if (menu) {
-            auto sprite = ButtonSprite::create("AMNYAM DECOR");
-            auto button = CCMenuItemSpriteExtra::create(
-                sprite, this, menu_selector(AmnyamMenu::onOpenDecor)
+            auto btn = CCMenuItemSpriteExtra::create(
+                ButtonSprite::create("AMNYAM DECOR"),
+                this,
+                menu_selector(AmnyamMenu::openDecor)
             );
-            menu->addChild(button);
+            menu->addChild(btn);
             menu->updateLayout();
         }
-
         return true;
     }
 
-    void onOpenDecor(CCObject*) {
-        createQuickPopup(
+    void openDecor(CCObject*) {
+        FLAlertLayer::create(
             "AMNYAM DECOR",
-            "Выбери стиль украшения!",
-            "Зелёный",
-            "Жёлтый",
-            [](auto, bool yellow) {
-                if (yellow) {
-                    FLAlertLayer::create(
-                        "AMNYAM DECOR", "Выбран жёлтый декор!", "OK"
-                    )->show();
-                } else {
-                    FLAlertLayer::create(
-                        "AMNYAM DECOR", "Выбран зелёный декор!", "OK"
-                    )->show();
-                }
+            "Choose your decoration style!",
+            "Green",
+            "Yellow",
+            [](FLAlertLayer*, bool yellow) {
+                FLAlertLayer::create(
+                    "AMNYAM DECOR",
+                    yellow ? "Yellow Decor selected!" : "Green Decor selected!",
+                    "OK"
+                )->show();
             }
-        );
+        )->show();
     }
 };
