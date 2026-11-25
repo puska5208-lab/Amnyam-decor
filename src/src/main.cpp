@@ -1,11 +1,11 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/EditorUI.hpp>
 #include <chrono>
+#include <deque>
 
 using namespace geode::prelude;
 
-static std::chrono::steady_clock::time_point lastRequest;
-static bool hasRequested = false;
+static std::deque<std::chrono::steady_clock::time_point> requests;
 
 class $modify(AmnyamEditor, EditorUI) {
 
@@ -69,32 +69,33 @@ class $modify(AmnyamEditor, EditorUI) {
         }
 
         auto now = std::chrono::steady_clock::now();
+        auto limit = std::chrono::minutes(10);
 
-        if (hasRequested) {
-            auto elapsed =
-                std::chrono::duration_cast<std::chrono::seconds>(
-                    now - lastRequest
-                ).count();
-
-            if (elapsed < 600) {
-                int remaining = 600 - elapsed;
-
-                FLAlertLayer::create(
-                    "AMNYAM AI",
-                    fmt::format(
-                        "Please wait {} min. {} sec.!",
-                        remaining / 60,
-                        remaining % 60
-                    ),
-                    "OK"
-                )->show();
-
-                return;
-            }
+        while (!requests.empty() &&
+               now - requests.front() >= limit) {
+            requests.pop_front();
         }
 
-        lastRequest = now;
-        hasRequested = true;
+        if (requests.size() >= 100) {
+            auto remaining =
+                std::chrono::duration_cast<std::chrono::seconds>(
+                    limit - (now - requests.front())
+                ).count();
+
+            FLAlertLayer::create(
+                "AMNYAM AI",
+                fmt::format(
+                    "Request limit reached! Try again in {} min. {} sec.",
+                    remaining / 60,
+                    remaining % 60
+                ),
+                "OK"
+            )->show();
+
+            return;
+        }
+
+        requests.push_back(now);
 
         FLAlertLayer::create(
             "AMNYAM AI",
