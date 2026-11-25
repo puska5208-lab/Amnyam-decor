@@ -1,5 +1,9 @@
+
 {
-  "geode": "5.11.2",
+  "geode": "v5.11.2",
+  "gd": {
+    "android": "2.2081"
+  },
   "version": "v1.0.0",
   "id": "amnyam.dec",
   "name": "Amnyam Dec",
