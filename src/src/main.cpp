@@ -23,7 +23,7 @@ class $modify(AmnyamEditor, EditorUI) {
         auto input = CCTextInputNode::create(
             220,
             30,
-            "ОПИШИ ДЕКОР",
+            "Describe your decor...",
             "bigFont.fnt"
         );
 
@@ -32,7 +32,7 @@ class $modify(AmnyamEditor, EditorUI) {
         m_fields->promptInput = input;
 
         auto btn = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("AI"),
+            ButtonSprite::create("CREATE"),
             this,
             menu_selector(AmnyamEditor::openDecor)
         );
@@ -51,8 +51,8 @@ class $modify(AmnyamEditor, EditorUI) {
         if (prompt.empty()) {
             FLAlertLayer::create(
                 "AMNYAM AI",
-                "Сначала опиши, какой декор ты хочешь!",
-                "ПОНЯТНО"
+                "Describe your decor first!",
+                "OK"
             )->show();
             return;
         }
@@ -63,8 +63,8 @@ class $modify(AmnyamEditor, EditorUI) {
         if (count == 0) {
             FLAlertLayer::create(
                 "AMNYAM AI",
-                "Сначала выдели постройку!",
-                "ПОНЯТНО"
+                "Select a building first!",
+                "OK"
             )->show();
             return;
         }
@@ -83,11 +83,11 @@ class $modify(AmnyamEditor, EditorUI) {
                 FLAlertLayer::create(
                     "AMNYAM AI",
                     fmt::format(
-                        "Подожди ещё {} мин. {} сек.!",
+                        "Please wait {} min. {} sec.!",
                         remaining / 60,
                         remaining % 60
                     ),
-                    "ОК"
+                    "OK"
                 )->show();
 
                 return;
@@ -100,11 +100,11 @@ class $modify(AmnyamEditor, EditorUI) {
         FLAlertLayer::create(
             "AMNYAM AI",
             fmt::format(
-                "Твоё описание: {}\nВыделенных объектов: {}\n\nИнтерфейс готовится. Подключение ИИ будет следующим этапом!",
+                "Your prompt: {}\nSelected objects: {}\n\nAI integration is coming in the next update!",
                 prompt,
                 count
             ),
-            "ОК"
+            "OK"
         )->show();
     }
 };
