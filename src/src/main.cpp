@@ -8,16 +8,18 @@ class $modify(AmnyamEditor, EditorUI) {
         if (!EditorUI::init(editor)) return false;
 
         auto btn = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("AMNYAM DECOR"),
+            ButtonSprite::create("DEC"),
             this,
             menu_selector(AmnyamEditor::openDecor)
         );
 
         auto menu = CCMenu::create();
         menu->addChild(btn);
-        menu->setPosition({ 100, 60 });
-        this->addChild(menu);
 
+        auto size = CCDirector::sharedDirector()->getWinSize();
+        menu->setPosition({size.width - 35, 150});
+
+        this->addChild(menu);
         return true;
     }
 
