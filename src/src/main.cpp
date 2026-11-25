@@ -1,3 +1,4 @@
+
 #include <Geode/Geode.hpp>
 #include <Geode/modify/EditorUI.hpp>
 
@@ -26,15 +27,31 @@ class $modify(AmnyamEditor, EditorUI) {
     void openDecor(CCObject*) {
         createQuickPopup(
             "AMNYAM DECOR",
-            "Choose decoration style!",
+            "Choose decoration color!",
             "Green",
-            "Yellow",
-            [](auto, bool yellow) {
-                FLAlertLayer::create(
-                    "AMNYAM DECOR",
-                    yellow ? "Yellow selected!" : "Green selected!",
-                    "OK"
-                )->show();
+            "More colors",
+            [this](auto, bool more) {
+                if (more) {
+                    createQuickPopup(
+                        "AMNYAM DECOR",
+                        "Choose another color!",
+                        "Blue",
+                        "Yellow",
+                        [](auto, bool yellow) {
+                            FLAlertLayer::create(
+                                "AMNYAM DECOR",
+                                yellow ? "Yellow selected!" : "Blue selected!",
+                                "OK"
+                            )->show();
+                        }
+                    );
+                } else {
+                    FLAlertLayer::create(
+                        "AMNYAM DECOR",
+                        "Green selected!",
+                        "OK"
+                    )->show();
+                }
             }
         );
     }
