@@ -82,7 +82,6 @@ class $modify(AmnyamEditor, EditorUI) {
 
         float centerX = (minX + maxX) / 2.f;
         float centerY = (minY + maxY) / 2.f;
-
         float offset = 25.f;
 
         auto addDecor = [&](float x, float y) {
@@ -91,7 +90,9 @@ class $modify(AmnyamEditor, EditorUI) {
                 x, y
             );
 
-            m_editorLayer->addObjectFromString(data);
+            m_editorLayer->createObjectsFromString(
+                data, false, false
+            );
         };
 
         addDecor(minX - offset, maxY + offset);
