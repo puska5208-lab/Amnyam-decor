@@ -11,6 +11,7 @@ class $modify(AmnyamEditor, EditorUI) {
 
     struct Fields {
         CCTextInputNode* promptInput = nullptr;
+        bool inputVisible = false;
     };
 
     bool init(LevelEditorLayer* editor) {
@@ -26,7 +27,8 @@ class $modify(AmnyamEditor, EditorUI) {
             "bigFont.fnt"
         );
 
-        input->setPosition({size.width - 170, 150});
+        input->setPosition({size.width - 170, 190});
+        input->setVisible(false);
         this->addChild(input);
         m_fields->promptInput = input;
 
@@ -45,6 +47,13 @@ class $modify(AmnyamEditor, EditorUI) {
     }
 
     void openDecor(CCObject*) {
+
+        if (!m_fields->inputVisible) {
+            m_fields->promptInput->setVisible(true);
+            m_fields->inputVisible = true;
+            return;
+        }
+
         auto prompt = m_fields->promptInput->getString();
 
         if (prompt.empty()) {
@@ -100,11 +109,15 @@ class $modify(AmnyamEditor, EditorUI) {
         FLAlertLayer::create(
             "AMNYAM AI",
             fmt::format(
-                "Your prompt: {}\nSelected objects: {}\n\nAI integration is coming in the next update!",
+                "Your prompt: {}\nSelected objects: {}\n\nAI integration is coming soon!",
                 prompt,
                 count
             ),
             "OK"
         )->show();
+
+        m_fields->promptInput->setVisible(false);
+        m_fields->inputVisible = false;
+        m_fields->promptInput->setString("");
     }
 };
