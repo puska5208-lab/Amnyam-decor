@@ -1,17 +1,11 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/EditorUI.hpp>
-#include <chrono>
-#include <deque>
 
 using namespace geode::prelude;
 
-static std::deque<std::chrono::steady_clock::time_point> requests;
-
 class $modify(AmnyamEditor, EditorUI) {
-
     struct Fields {
         CCTextInputNode* promptInput = nullptr;
-        bool inputVisible = false;
     };
 
     bool init(LevelEditorLayer* editor) {
@@ -21,39 +15,30 @@ class $modify(AmnyamEditor, EditorUI) {
         auto size = CCDirector::sharedDirector()->getWinSize();
 
         auto input = CCTextInputNode::create(
-            220,
-            30,
+            220, 30,
             "Describe your decor...",
             "bigFont.fnt"
         );
 
-        input->setPosition({size.width - 170, 190});
-        input->setVisible(false);
+        input->setPosition({size.width - 170, 150});
         this->addChild(input);
         m_fields->promptInput = input;
 
-        auto btn = CCMenuItemSpriteExtra::create(
+        auto button = CCMenuItemSpriteExtra::create(
             ButtonSprite::create("CREATE"),
             this,
-            menu_selector(AmnyamEditor::openDecor)
+            menu_selector(AmnyamEditor::createDecor)
         );
 
         auto menu = CCMenu::create();
-        menu->addChild(btn);
-        menu->setPosition({size.width - 35, 150});
+        menu->addChild(button);
+        menu->setPosition({size.width - 35, 100});
         this->addChild(menu);
 
         return true;
     }
 
-    void openDecor(CCObject*) {
-
-        if (!m_fields->inputVisible) {
-            m_fields->promptInput->setVisible(true);
-            m_fields->inputVisible = true;
-            return;
-        }
-
+    void createDecor(CCObject*) {
         auto prompt = m_fields->promptInput->getString();
 
         if (prompt.empty()) {
@@ -66,9 +51,8 @@ class $modify(AmnyamEditor, EditorUI) {
         }
 
         auto objects = this->getSelectedObjects();
-        int count = objects ? objects->count() : 0;
 
-        if (count == 0) {
+        if (!objects || objects->count() == 0) {
             FLAlertLayer::create(
                 "AMNYAM AI",
                 "Select a building first!",
@@ -77,47 +61,12 @@ class $modify(AmnyamEditor, EditorUI) {
             return;
         }
 
-        auto now = std::chrono::steady_clock::now();
-        auto limit = std::chrono::minutes(10);
-
-        while (!requests.empty() &&
-               now - requests.front() >= limit) {
-            requests.pop_front();
-        }
-
-        if (requests.size() >= 100) {
-            auto remaining =
-                std::chrono::duration_cast<std::chrono::seconds>(
-                    limit - (now - requests.front())
-                ).count();
-
-            FLAlertLayer::create(
-                "AMNYAM AI",
-                fmt::format(
-                    "Request limit reached! Try again in {} min. {} sec.",
-                    remaining / 60,
-                    remaining % 60
-                ),
-                "OK"
-            )->show();
-
-            return;
-        }
-
-        requests.push_back(now);
-
         FLAlertLayer::create(
             "AMNYAM AI",
-            fmt::format(
-                "Your prompt: {}\nSelected objects: {}\n\nAI integration is coming soon!",
-                prompt,
-                count
-            ),
+            "Your request has been received!\n"
+            "Selected objects: " +
+            std::to_string(objects->count()),
             "OK"
         )->show();
-
-        m_fields->promptInput->setVisible(false);
-        m_fields->inputVisible = false;
-        m_fields->promptInput->setString("");
     }
 };
