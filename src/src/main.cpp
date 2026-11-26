@@ -6,7 +6,10 @@ using namespace geode::prelude;
 
 class $modify(AmnyamEditor, EditorUI) {
     struct Fields {
-        CCTextInputNode* promptInput = nullptr;
+        CCMenu* colorMenu = nullptr;
+        int red = 0;
+        int green = 255;
+        int blue = 0;
     };
 
     bool init(LevelEditorLayer* editor) {
@@ -15,47 +18,87 @@ class $modify(AmnyamEditor, EditorUI) {
 
         auto size = CCDirector::sharedDirector()->getWinSize();
 
-        auto input = CCTextInputNode::create(
-            220, 30,
-            "Describe your decor...",
-            "bigFont.fnt"
-        );
-
-        input->setPosition({size.width - 170, 150});
-        this->addChild(input);
-        m_fields->promptInput = input;
-
-        auto button = CCMenuItemSpriteExtra::create(
-            ButtonSprite::create("CREATE"),
-            this,
-            menu_selector(AmnyamEditor::createDecor)
-        );
-
         auto menu = CCMenu::create();
-        menu->addChild(button);
-        menu->setPosition({size.width - 35, 100});
+
+        auto decButton = CCMenuItemSpriteExtra::create(
+            ButtonSprite::create("DEC"),
+            this,
+            menu_selector(AmnyamEditor::toggleColors)
+        );
+
+        menu->addChild(decButton);
+        menu->setPosition({size.width - 65, 100});
         this->addChild(menu);
+
+        auto colors = CCMenu::create();
+
+        auto yellow = CCMenuItemSpriteExtra::create(
+            ButtonSprite::create("YELLOW"),
+            this,
+            menu_selector(AmnyamEditor::chooseYellow)
+        );
+
+        auto blue = CCMenuItemSpriteExtra::create(
+            ButtonSprite::create("BLUE"),
+            this,
+            menu_selector(AmnyamEditor::chooseBlue)
+        );
+
+        auto green = CCMenuItemSpriteExtra::create(
+            ButtonSprite::create("GREEN"),
+            this,
+            menu_selector(AmnyamEditor::chooseGreen)
+        );
+
+        yellow->setPosition({-100, 0});
+        blue->setPosition({0, 0});
+        green->setPosition({100, 0});
+
+        colors->addChild(yellow);
+        colors->addChild(blue);
+        colors->addChild(green);
+
+        colors->setPosition({size.width - 165, 55});
+        colors->setVisible(false);
+
+        this->addChild(colors);
+        m_fields->colorMenu = colors;
 
         return true;
     }
 
-    void createDecor(CCObject*) {
-        auto prompt = m_fields->promptInput->getString();
+    void toggleColors(CCObject*) {
+        auto menu = m_fields->colorMenu;
+        menu->setVisible(!menu->isVisible());
+    }
 
-        if (prompt.empty()) {
-            FLAlertLayer::create(
-                "AMNYAM AI",
-                "Describe your decor first!",
-                "OK"
-            )->show();
-            return;
-        }
+    void chooseYellow(CCObject*) {
+        m_fields->red = 255;
+        m_fields->green = 220;
+        m_fields->blue = 30;
+        createDecor();
+    }
 
+    void chooseBlue(CCObject*) {
+        m_fields->red = 30;
+        m_fields->green = 120;
+        m_fields->blue = 255;
+        createDecor();
+    }
+
+    void chooseGreen(CCObject*) {
+        m_fields->red = 30;
+        m_fields->green = 255;
+        m_fields->blue = 70;
+        createDecor();
+    }
+
+    void createDecor() {
         auto objects = this->getSelectedObjects();
 
         if (!objects || objects->count() == 0) {
             FLAlertLayer::create(
-                "AMNYAM AI",
+                "DEC",
                 "Select blocks first!",
                 "OK"
             )->show();
@@ -73,6 +116,7 @@ class $modify(AmnyamEditor, EditorUI) {
                 continue;
 
             auto pos = obj->getPosition();
+
             float scale = obj->getScale();
 
             if (scale <= 0.f)
@@ -81,10 +125,15 @@ class $modify(AmnyamEditor, EditorUI) {
             float offset = 5.f * scale;
             float decoScale = 0.18f * scale;
 
-            auto addInside = [&](float x, float y) {
+            auto addDecor = [&](float x, float y) {
                 auto data = fmt::format(
-                    "1,1,2,{:.2f},3,{:.2f},32,{:.3f}",
-                    x, y, decoScale
+                    "1,1,2,{:.2f},3,{:.2f},32,{:.3f},7,{:.0f},8,{:.0f},9,{:.0f}",
+                    x,
+                    y,
+                    decoScale,
+                    static_cast<float>(m_fields->red),
+                    static_cast<float>(m_fields->green),
+                    static_cast<float>(m_fields->blue)
                 );
 
                 m_editorLayer->createObjectsFromString(
@@ -94,16 +143,22 @@ class $modify(AmnyamEditor, EditorUI) {
                 added++;
             };
 
-            addInside(pos.x - offset, pos.y);
-            addInside(pos.x + offset, pos.y);
-            addInside(pos.x, pos.y + offset);
-            addInside(pos.x, pos.y - offset);
+            addDecor(pos.x - offset, pos.y);
+            addDecor(pos.x + offset, pos.y);
+            addDecor(pos.x, pos.y + offset);
+            addDecor(pos.x, pos.y - offset);
+            addDecor(pos.x - offset, pos.y + offset);
+            addDecor(pos.x + offset, pos.y + offset);
+            addDecor(pos.x - offset, pos.y - offset);
+            addDecor(pos.x + offset, pos.y - offset);
         }
 
+        m_fields->colorMenu->setVisible(false);
+
         FLAlertLayer::create(
-            "AMNYAM AI",
+            "AMNYAM DEC",
             fmt::format("Added {} decor objects!", added),
-            "OK"
+            "NICE!"
         )->show();
     }
 };
